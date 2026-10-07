@@ -1,0 +1,7 @@
+# CubeIDE build output (one folder per configuration) and local tooling
+/firmware/*-Debug/
+/firmware/*-Release/
+/firmware/.settings/
+/build-logs/
+*.launch.bak
+__pycache__/
