@@ -72,6 +72,10 @@ The native build compiles the application with `-Wall -Wextra`, which the Arduin
 
 They are left as-is to keep the port behaviour-identical.
 
+## Later change
+
+Milestone 5 moved HAL and clock initialisation into a priority-101 constructor, matching STM32duino's start-up order; see [PORT_LOG_NOZZLE.md](PORT_LOG_NOZZLE.md). This applies to the Master too.
+
 ## Not verified
 
 Nothing has run on hardware. [validation/master-bench.md](../validation/master-bench.md) is the comparison against the Arduino Master that closes this milestone.

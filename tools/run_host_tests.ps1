@@ -67,8 +67,13 @@ foreach ($case in $cases) {
     $args = $flags + @($case.Extra | Where-Object { $_ }) + $case.Sources + $objects + @('-o', $exe)
     & $clang @args
     if ($LASTEXITCODE) { Write-Output "BUILD FAILED $($case.Name)"; $failed++; continue }
-    & $exe
-    if ($LASTEXITCODE) { $failed++ }
+    # Reference libraries print sanitizer notes about their own code on stderr;
+    # only the exit code decides. (Windows PowerShell turns stderr into errors under 'Stop'.)
+    $ErrorActionPreference = 'Continue'
+    & $exe 2>&1 | ForEach-Object { "$_" }
+    $code = $LASTEXITCODE
+    $ErrorActionPreference = 'Stop'
+    if ($code) { $failed++ }
 }
 if ($failed) { Write-Output "$failed host test program(s) failed"; exit 1 }
 Write-Output 'All host tests passed'

@@ -353,7 +353,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="Platform/Startup/startup_stm32f446xx.s|Platform/Startup/startup_stm32f401xc.s|Boards/Gantry|Boards/GantryXHall|Boards/GantryZHall|Boards/Magazine|Boards/Master|App|Compat" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="Platform/Startup/startup_stm32f446xx.s|Platform/Startup/startup_stm32f401xc.s|Boards/Gantry|Boards/GantryXHall|Boards/GantryZHall|Boards/Magazine|Boards/Master|BringUp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -470,7 +470,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="Platform/Startup/startup_stm32f446xx.s|Platform/Startup/startup_stm32f401xc.s|Boards/Gantry|Boards/GantryXHall|Boards/GantryZHall|Boards/Magazine|Boards/Master|App|Compat" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="Platform/Startup/startup_stm32f446xx.s|Platform/Startup/startup_stm32f401xc.s|Boards/Gantry|Boards/GantryXHall|Boards/GantryZHall|Boards/Magazine|Boards/Master|BringUp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

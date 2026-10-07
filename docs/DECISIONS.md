@@ -24,4 +24,5 @@
 | 2026-10-07 | Application copied unchanged apart from 2 files; Arduino APIs served by `firmware/Compat/` | Keeps the port comparable line for line; see `docs/PORT_LOG_MASTER.md` |
 | 2026-10-07 | Native builds report `BUILD:NATIVE <date> <time>` in `ID`, with `FW:` unchanged | Tells native and Arduino images apart without affecting ESP32 version logic |
 | 2026-10-07 | Boards not yet ported build the bring-up app (`PORTED` set in the generator) | Every configuration keeps building between milestones |
+| 2026-10-07 | HAL and clock tree initialised in a priority-101 constructor (`premain`), before application globals | Same start-up order as STM32duino; globals such as the DHT driver see the final clock |
 | 2026-10-07 | Host tests use `-mno-ms-bitfields` | Matches ARM GCC bitfield layout (confirmed by compiling TMCStepper's structs with arm-none-eabi-g++) |

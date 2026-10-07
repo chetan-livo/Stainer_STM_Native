@@ -25,7 +25,7 @@ MCUS = {
 
 # Boards whose application has been ported build App/; the others build the
 # bring-up application (BringUp/) until their porting milestone.
-PORTED = {'Master'}
+PORTED = {'Master', 'Nozzle'}
 
 # name, MCU, board folder under Boards/, board define (matches the Arduino
 # sketch's PCB selection), extra defines, linker script override

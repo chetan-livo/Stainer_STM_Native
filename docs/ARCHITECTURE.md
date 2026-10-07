@@ -27,6 +27,10 @@ The platform keeps the API the existing firmware already calls (`Serial.print`, 
 
 `tools/generate_cubeide_project.py` is the single source of these settings.
 
+## Start-up
+
+`premain()` (`Platform/Src/main.cpp`) is a priority-101 constructor. It runs `HAL_Init()`, `SystemClock_Config()` and `platformInit()` before any default-priority C++ constructor, as STM32duino does. `main()` then calls `appSetup()` once and `appLoop()` forever.
+
 ## Clock trees
 
 These are identical to the STM32duino generic variants the boards run today, using HSI only with no crystal assumed:
