@@ -9,7 +9,7 @@ Outputs: firmware/<Configuration>/Stainer_STM_Native-<Board>.elf/.bin/.hex/.map
 Logs:    build-logs/<Configuration>.log (ignored by git)
 Set STM32CUBEIDE to the IDE folder if it is not C:\ST\STM32CubeIDE_*\STM32CubeIDE.
 #>
-param([string[]]$Configurations = @(), [switch]$Clean)
+param([switch]$Clean, [Parameter(ValueFromRemainingArguments = $true)][string[]]$Configurations = @())
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent $PSScriptRoot
 $project = Join-Path $repo 'firmware'

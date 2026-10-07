@@ -20,6 +20,10 @@ Purpose: prove the clock tree, startup, linker map, UART and USB on real hardwar
    | Hall boards | none (USB only) | |
 
 7. In the debugger, check `SystemCoreClock` and that `platform_last_error` stays 0.
+8. Milestone 2 read-only checks (same terminal):
+   - `ADC <pin>` (e.g. `ADC PA4` on a Master IR input) prints `RAW` and `AVG64` 12-bit values. Compare with the Arduino firmware's raw reading of the same sensor in the same state.
+   - `I2CSCAN` lists responding addresses. Expect 0x68 (MPU6050) on Master I2C3, and the LiDAR (0x29) on Gantry I2C3 if fitted.
+   - `ID` shows `RESET=0x..`, the RCC reset flags; `(IWDG)` appears after a watchdog reset.
 
 ## Restore
 

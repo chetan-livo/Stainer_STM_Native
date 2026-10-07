@@ -6,6 +6,11 @@
 #include "Print.h"
 #include "Uart.h"
 #include "UsbSerial.h"
+#include "Analog.h"
+#include "Interrupts.h"
+#include "Wire.h"
+#include "StepEngine.h"
+#include "Watchdog.h"
 #include "board_identity.h"
 #include "platform_irq.h"
 

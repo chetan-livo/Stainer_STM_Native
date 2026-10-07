@@ -7,6 +7,7 @@ extern "C" void SystemClock_Config(void);
 
 void platformInit()
 {
+    Watchdog::resetCauseCapture();
     timeInit();
     HAL_NVIC_SetPriority(SysTick_IRQn, IRQ_PRIO_SYSTICK, 0);
 }

@@ -5,7 +5,7 @@ Native STM32 (HAL/LL/CMSIS) firmware for the Livo Stainer controller boards, rep
 | Folder | Contents |
 |---|---|
 | `firmware/` | STM32CubeIDE project (`.project`, `.cproject`), sources and ST drivers |
-| `firmware/Platform/` | Native platform layer: clocks, startup, linker scripts, GPIO, time base, UART, USB CDC, `Print`/`Stream` |
+| `firmware/Platform/` | Native platform layer: clocks, startup, linker scripts, GPIO, time base, UART, USB CDC, `Print`/`Stream`, ADC, PWM, I2C, EXTI, step engine, watchdog |
 | `firmware/Boards/` | Per-board configuration (pins, peripherals) |
 | `firmware/App/` | Application. Milestone 1 holds only the bring-up app |
 | `firmware/Drivers/`, `firmware/Middlewares/` | Unmodified ST code from STM32Cube_FW_F4 V1.28.3 (CMSIS, HAL/LL, USB device library) |
@@ -41,8 +41,8 @@ powershell -ExecutionPolicy Bypass -File tools/build.ps1                  # ever
 powershell -ExecutionPolicy Bypass -File tools/build.ps1 Master-Release   # one
 ```
 
-Build settings are generated: edit `tools/generate_cubeide_project.py`, then run `python tools/generate_cubeide_project.py`. Do not edit `.cproject` by hand in parallel, because the next regeneration overwrites it.
+Pin tables are generated too: `python tools/generate_pinmaps.py` (needs the STM32duino 3.0.0 core installed). Build settings are generated: edit `tools/generate_cubeide_project.py`, then run `python tools/generate_cubeide_project.py`. Do not edit `.cproject` by hand in parallel, because the next regeneration overwrites it.
 
 ## Status
 
-Milestone 1 (platform skeleton) builds for all 14 configurations. **No board has been flashed yet.** See [docs/PORTING_PLAN.md](docs/PORTING_PLAN.md) for the milestones and [validation/bring-up.md](validation/bring-up.md) for the first hardware check.
+Milestones 1 (platform skeleton) and 2 (ADC, PWM, I2C, EXTI, step engine, watchdog drivers) build for all 14 configurations with zero warnings. **No board has been flashed yet.** See [docs/PORTING_PLAN.md](docs/PORTING_PLAN.md) for the milestones and [validation/bring-up.md](validation/bring-up.md) for the first hardware check.
