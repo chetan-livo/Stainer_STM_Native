@@ -8,7 +8,9 @@ Native STM32 (HAL/LL/CMSIS) firmware for the Livo Stainer controller boards, rep
 | `firmware/Platform/` | Native platform layer: clocks, startup, linker scripts, GPIO, time base, UART, USB CDC, `Print`/`Stream`, ADC, PWM, I2C, EXTI, step engine, watchdog |
 | `firmware/Boards/` | Per-board configuration (pins, peripherals) |
 | `firmware/Devices/` | External chip drivers (TMC2209) |
-| `firmware/App/` | Application. Milestone 1 holds only the bring-up app |
+| `firmware/App/` | Livo application, ported from Livo-Stainer `271a10b` (built for Master so far) |
+| `firmware/Compat/` | Arduino/library header names mapped onto the platform |
+| `firmware/BringUp/` | Bring-up app for boards not yet ported |
 | `firmware/Drivers/`, `firmware/Middlewares/` | Unmodified ST code from STM32Cube_FW_F4 V1.28.3 (CMSIS, HAL/LL, USB device library) |
 | `docs/` | Plan, architecture, board matrix, decision log |
 | `tools/` | Project generator and headless build script |
@@ -55,4 +57,4 @@ This needs LLVM-MinGW (`winget install MartinStorsjo.LLVM-MinGW.UCRT`). The equi
 
 ## Status
 
-Milestones 1 (platform skeleton), 2 (ADC, PWM, I2C, EXTI, step engine, watchdog) and 3 (`String`, TMC2209 driver, clean-room motion planner) build for all 14 configurations with zero warnings, and all host tests pass. **No board has been flashed yet.** See [docs/PORTING_PLAN.md](docs/PORTING_PLAN.md) for the milestones and [validation/bring-up.md](validation/bring-up.md) for the first hardware check.
+Milestones 1 (platform skeleton), 2 (ADC, PWM, I2C, EXTI, step engine, watchdog) and 3 (`String`, TMC2209 driver, clean-room motion planner) build for all 14 configurations with zero platform warnings, and all host tests pass. Milestone 4: the **Master application** is ported and builds (`Master-*`: about 140 KB flash, 36 KB RAM); the bench comparison is pending ([validation/master-bench.md](validation/master-bench.md)). **No board has been flashed yet.** See [docs/PORTING_PLAN.md](docs/PORTING_PLAN.md) for the milestones and [validation/bring-up.md](validation/bring-up.md) for the first hardware check.

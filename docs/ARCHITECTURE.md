@@ -6,6 +6,8 @@
 App/        application: command parsing, motion, bed scheduling, diagnostics
 Boards/     per-board pins and peripheral assignments
 Devices/    external chip drivers (TMC2209; later VL53L0X, DHT11, NeoPixel)
+Compat/     Arduino/library header names mapped onto Platform (Arduino.h, TMCStepper.h, ...)
+BringUp/    bring-up application for boards not yet ported
 Platform/   native drivers with an Arduino-shaped API (Print/Stream, pinMode, millis, ...)
 Drivers/    ST HAL/LL + CMSIS (unmodified)
 Middlewares ST USB device library, CDC class (unmodified)

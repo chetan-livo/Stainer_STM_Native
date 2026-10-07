@@ -23,6 +23,10 @@ MCUS = {
     'F401RC': ('STM32F401RCTx', 'STM32F401xC', 'startup_stm32f401xc.s', 'STM32F401RCTX_FLASH.ld'),
 }
 
+# Boards whose application has been ported build App/; the others build the
+# bring-up application (BringUp/) until their porting milestone.
+PORTED = {'Master'}
+
 # name, MCU, board folder under Boards/, board define (matches the Arduino
 # sketch's PCB selection), extra defines, linker script override
 BOARDS = [
@@ -46,7 +50,7 @@ VARIANTS = {
 }
 
 INCLUDES = [
-    '../App', '../Boards', '../Devices', '../Platform/Inc',
+    '../App', '../Boards', '../Compat', '../Devices', '../Platform/Inc',
     '../Drivers/CMSIS/Include',
     '../Drivers/CMSIS/Device/ST/STM32F4xx/Include',
     '../Drivers/STM32F4xx_HAL_Driver/Inc',
@@ -84,7 +88,8 @@ def configuration(board, variant):
     script = '${workspace_loc:/${ProjName}/Platform/LinkerScripts/' + ld + '}'
     other_startups = [f'Platform/Startup/{s}' for _, _, s, _ in MCUS.values() if s != startup]
     other_boards = sorted({f'Boards/{b[2]}' for b in BOARDS if b[2] != folder})
-    excluding = '|'.join(other_startups + other_boards)
+    application = ['BringUp'] if name in PORTED else ['App', 'Compat']
+    excluding = '|'.join(other_startups + other_boards + application)
     defaults = (f'com.st.stm32cube.ide.common.services.build.inputs.revA.1.0.6 || {cfg} || {str(debug).lower()} || '
                 f'Executable || {ST}.option.toolchain.value.workspace || {target} || 0 || 0 || arm-none-eabi- || '
                 '${gnu_tools_for_stm32_compiler_path} || ' + ' | '.join(INCLUDES) + ' ||  ||  || '

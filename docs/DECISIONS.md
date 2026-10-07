@@ -20,4 +20,8 @@
 | 2026-10-07 | TMC2209 driver derived from TMCStepper (MIT) with its notice in `Devices/LICENSE-TMCStepper.txt` | Byte-identical register traffic; permissive licence |
 | 2026-10-07 | TMC `replyDelay` (2 ms) kept | Parity with field firmware until bench-verified; reduce in milestone 8 if useful |
 | 2026-10-07 | Host tests with LLVM-MinGW (clang 22.1.8, winget `MartinStorsjo.LLVM-MinGW.UCRT`) | User approved a host compiler. Plain `LLVM.LLVM` lacks a C++ runtime without Visual Studio |
+| 2026-10-07 | Port source: Livo-Stainer `perf/timer-step-engine` @ `271a10b` | User decision |
+| 2026-10-07 | Application copied unchanged apart from 2 files; Arduino APIs served by `firmware/Compat/` | Keeps the port comparable line for line; see `docs/PORT_LOG_MASTER.md` |
+| 2026-10-07 | Native builds report `BUILD:NATIVE <date> <time>` in `ID`, with `FW:` unchanged | Tells native and Arduino images apart without affecting ESP32 version logic |
+| 2026-10-07 | Boards not yet ported build the bring-up app (`PORTED` set in the generator) | Every configuration keeps building between milestones |
 | 2026-10-07 | Host tests use `-mno-ms-bitfields` | Matches ARM GCC bitfield layout (confirmed by compiling TMCStepper's structs with arm-none-eabi-g++) |

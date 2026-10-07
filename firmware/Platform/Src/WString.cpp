@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <stdio.h>
 
 namespace {
 // Formats into `out` (at least 66 bytes); returns the length.
@@ -30,29 +31,36 @@ size_t formatSigned(long value, unsigned base, char* out)
     return formatUnsigned((unsigned long)value, base, out);
 }
 
+// Same arithmetic as the Arduino core's dtostrf(value, decimals + 2, decimals):
+// round half up at the last place, integer part printed signed, the fraction
+// scaled in one step, right-justified to decimals + 2 characters. NaN/inf
+// print as "nan"/"inf" (undefined behaviour in the Arduino version).
 size_t formatFloat(double value, unsigned decimals, char* out, size_t size)
 {
     if (isnan(value)) { strcpy(out, "nan"); return 3; }
     if (isinf(value)) { strcpy(out, "inf"); return 3; }
-    if (decimals > 9) decimals = 9;
-    size_t n = 0;
-    if (value < 0) { out[n++] = '-'; value = -value; }
+    if (decimals > 10) decimals = 10;
+    const bool negative = value < 0.0;
+    if (negative) value = -value;
     double rounding = 0.5;
     for (unsigned i = 0; i < decimals; ++i) rounding /= 10.0;
     value += rounding;
-    if (value >= 4294967296.0) { strcpy(out + n, "ovf"); return n + 3; }
-    unsigned long integer = (unsigned long)value;
-    double fraction = value - (double)integer;
-    n += formatUnsigned(integer, 10, out + n);
-    if (decimals) out[n++] = '.';
-    while (decimals-- && n + 1 < size) {
-        fraction *= 10.0;
-        const unsigned d = (unsigned)fraction;
-        out[n++] = (char)('0' + d);
-        fraction -= d;
+    const unsigned long integer = (unsigned long)value;
+    char text[48];
+    if (decimals) {
+        double decade = 1.0;
+        for (unsigned i = 0; i < decimals; ++i) decade *= 10.0;
+        const long fraction = (int)((value - (double)integer) * decade);
+        snprintf(text, sizeof(text), negative ? "-%ld.%0*ld" : "%ld.%0*ld", (long)integer, (int)decimals, fraction);
+    } else {
+        snprintf(text, sizeof(text), negative ? "-%ld" : "%ld", (long)integer);
     }
-    out[n] = '\0';
-    return n;
+    const size_t length = strlen(text), width = decimals + 2;
+    const size_t pad = length < width ? width - length : 0;
+    if (pad + length + 1 > size) { out[0] = '\0'; return 0; }
+    memset(out, ' ', pad);
+    memcpy(out + pad, text, length + 1);
+    return pad + length;
 }
 }
 
@@ -69,8 +77,8 @@ String::String(int value, unsigned char base) { char t[34]; assign(t, formatSign
 String::String(unsigned int value, unsigned char base) { char t[34]; assign(t, formatUnsigned(value, base, t)); }
 String::String(long value, unsigned char base) { char t[34]; assign(t, formatSigned(value, base, t)); }
 String::String(unsigned long value, unsigned char base) { char t[34]; assign(t, formatUnsigned(value, base, t)); }
-String::String(float value, unsigned char decimals) { char t[32]; assign(t, formatFloat(value, decimals, t, sizeof(t))); }
-String::String(double value, unsigned char decimals) { char t[32]; assign(t, formatFloat(value, decimals, t, sizeof(t))); }
+String::String(float value, unsigned char decimals) { char t[48]; assign(t, formatFloat(value, decimals, t, sizeof(t))); }
+String::String(double value, unsigned char decimals) { char t[48]; assign(t, formatFloat(value, decimals, t, sizeof(t))); }
 String::~String() { release(); }
 
 void String::release()
@@ -190,7 +198,7 @@ int String::indexOf(char c, size_t from) const
 
 int String::indexOf(const String& text, size_t from) const
 {
-    if (from > length_) return -1;
+    if (from >= length_) return -1;                    // as Arduino, also for ""
     const char* hit = strstr(c_str() + from, text.c_str());
     return hit ? (int)(hit - c_str()) : -1;
 }
@@ -203,7 +211,7 @@ int String::lastIndexOf(char c) const
 
 int String::lastIndexOf(const String& text) const
 {
-    if (text.length_ > length_) return -1;
+    if (text.length_ == 0 || length_ == 0 || text.length_ > length_) return -1;
     for (size_t i = length_ - text.length_ + 1; i-- > 0;)
         if (strncmp(c_str() + i, text.c_str(), text.length_) == 0) return (int)i;
     return -1;

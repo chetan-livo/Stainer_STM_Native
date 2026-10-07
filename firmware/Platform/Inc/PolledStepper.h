@@ -16,6 +16,9 @@ public:
     void setPinsInverted(bool directionInvert, bool stepInvert);
 
     bool run();                           // step if due; returns isRunning()
+    // One immediate pulse outside the planner (constant-speed callers);
+    // the position follows, any planned move is cancelled.
+    void stepNow(bool forward);
     MotionPlanner& planner() { return planner_; }
     const MotionPlanner& planner() const { return planner_; }
 

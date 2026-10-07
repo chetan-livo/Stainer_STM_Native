@@ -47,7 +47,7 @@ try {
         Write-Output "Building $config"
         # Windows PowerShell turns native stderr into errors under 'Stop'.
         $ErrorActionPreference = 'Continue'
-        & $exe @arguments *> $log
+        & $exe @arguments 2>&1 | Out-File -Encoding utf8 -FilePath $log
         $code = $LASTEXITCODE
         $ErrorActionPreference = 'Stop'
         $errors = @(Select-String -LiteralPath $log -Pattern ': error:|Error \d+|undefined reference' | Select-Object -First 5)

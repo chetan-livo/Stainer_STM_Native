@@ -39,3 +39,10 @@ bool PolledStepper::run()
     }
     return planner_.isRunning();
 }
+
+void PolledStepper::stepNow(bool forward)
+{
+    pulse(forward);
+    lastStepUs_ = micros();
+    planner_.setCurrentPosition(planner_.currentPosition() + (forward ? 1 : -1));
+}

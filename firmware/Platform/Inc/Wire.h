@@ -13,7 +13,7 @@
 // I2C interrupt (IRQ_PRIO_I2C), as in STM32duino.
 class TwoWire : public Stream {
 public:
-    static constexpr size_t BufferLength = 64;
+    static constexpr size_t BufferLength = 128; // Hall frames are 49 bytes; STM32duino sized per request
     static constexpr uint32_t TimeoutMs = 100;
 
     TwoWire(uint8_t sda, uint8_t scl);

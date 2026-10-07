@@ -43,10 +43,28 @@ if (Test-Path -LiteralPath $accel) {
                  Sources = @("$tests/test_planner.cpp", "$platform/Src/MotionPlanner.cpp", "$accel/AccelStepper.cpp") }
 } else { Write-Output 'SKIP test_planner: AccelStepper not installed' }
 
+$core = if ($env:STM32DUINO_CORE) { $env:STM32DUINO_CORE } else { Join-Path $env:LOCALAPPDATA 'Arduino15/packages/STMicroelectronics/hardware/stm32/3.0.0/cores/arduino' }
+if (Test-Path -LiteralPath "$core/api/String.cpp") {
+    $cases += @{ Name = 'test_wstring_vs_arduino'; Extra = @("-I$core", '-w');
+                 Sources = @("$tests/test_wstring_vs_arduino.cpp", "$platform/Src/WString.cpp", "$tests/arduino_string_ref.cpp");
+                 CSources = @("$core/itoa.c", "$core/avr/dtostrf.c") }
+    $cases += @{ Name = 'test_print_vs_arduino'; Extra = @("-I$core", '-w');
+                 Sources = @("$tests/test_print_vs_arduino.cpp", "$platform/Src/Print.cpp", "$platform/Src/WString.cpp",
+                             "$tests/arduino_print_ref.cpp", "$tests/arduino_string_ref.cpp", "$tests/host_platform_stubs.cpp");
+                 CSources = @("$core/itoa.c", "$core/avr/dtostrf.c") }
+} else { Write-Output 'SKIP test_wstring_vs_arduino: STM32duino 3.0.0 core not installed' }
+
 $failed = 0
 foreach ($case in $cases) {
     $exe = Join-Path $out ($case.Name + '.exe')
-    $args = $flags + @($case.Extra | Where-Object { $_ }) + $case.Sources + @('-o', $exe)
+    $objects = @()
+    # Reference C sources build without UBSan: STM32duino itoa.c negates LONG_MIN.
+    foreach ($c in @($case.CSources | Where-Object { $_ })) {
+        $obj = Join-Path $out ($case.Name + '_' + [IO.Path]::GetFileNameWithoutExtension($c) + '.o')
+        & (Join-Path (Split-Path -Parent $clang) 'clang.exe') -c -O1 -g -w -fsanitize=address -mno-ms-bitfields @($case.Extra | Where-Object { $_ }) $c -o $obj
+        $objects += $obj
+    }
+    $args = $flags + @($case.Extra | Where-Object { $_ }) + $case.Sources + $objects + @('-o', $exe)
     & $clang @args
     if ($LASTEXITCODE) { Write-Output "BUILD FAILED $($case.Name)"; $failed++; continue }
     & $exe
