@@ -125,12 +125,6 @@ void reportStats(Print& out) {
 }
 } // namespace StepEngine
 
-IsrStepper::IsrStepper() {
-    // Same initial state as the AccelStepper constructor.
-    setAcceleration(1);
-    setMaxSpeed(1);
-}
-
 bool IsrStepper::attach(uint8_t stepPin, uint8_t dirPin) {
 #ifdef LIVO_STEP_ENGINE
     if (stepPort_) return true;
@@ -161,103 +155,16 @@ void IsrStepper::setPinsInverted(bool directionInvert, bool stepInvert) {
 }
 
 bool IsrStepper::dueForStep(uint32_t tick) {
-    if (!active_ || !interval_ || !driverEnabled_ || held_ || !leased_ ||
+    if (!active_ || !planner_.stepIntervalUs() || !driverEnabled_ || held_ || !leased_ ||
         tick - leaseTick_ >= StepEngine::LeaseTicks) return false;
-    remainingUs_ -= StepEngine::TickUs;
-    if (remainingUs_ > 0) return false;
-    current_ = current_ + (direction_ ? 1 : -1);
-    const bool high = direction_ != dirInverted_;
+    if (!countdown_.tick(StepEngine::TickUs)) return false;
+    // DIR before the rising STEP edge (written here, raised after all motors).
+    const bool high = planner_.forward() != dirInverted_;
     dirPort_->BSRR = high ? dirMask_ : (dirMask_ << 16);
     return true;
 }
 
 void IsrStepper::planNextStep() {
-    computeNewSpeed();
-    if (!interval_) { remainingUs_ = 0; return; }
-    remainingUs_ += (int32_t)interval_;
-    // Intervals shorter than one tick cannot build a backlog of steps.
-    if (remainingUs_ < 0) remainingUs_ = 0;
-}
-
-// --- AccelStepper 1.64 planner, single precision -------------------------
-
-void IsrStepper::moveTo(long absolute) {
-    if (target_ != absolute) {
-        target_ = absolute;
-        computeNewSpeed();
-    }
-}
-
-void IsrStepper::setCurrentPosition(long position) {
-    target_ = current_ = position;
-    n_ = 0;
-    interval_ = 0;
-    speed_ = 0.0f;
-    remainingUs_ = 0;
-}
-
-void IsrStepper::computeNewSpeed() {
-    const long distanceTo = target_ - current_;
-    const long stepsToStop = (long)((speed_ * speed_) / (2.0f * acceleration_));
-    if (distanceTo == 0 && stepsToStop <= 1) {
-        interval_ = 0;
-        speed_ = 0.0f;
-        n_ = 0;
-        remainingUs_ = 0; // the next move steps on the next tick, as from rest
-        return;
-    }
-    if (distanceTo > 0) {
-        if (n_ > 0) {
-            if ((stepsToStop >= distanceTo) || !direction_) n_ = -stepsToStop;
-        } else if (n_ < 0) {
-            if ((stepsToStop < distanceTo) && direction_) n_ = -n_;
-        }
-    } else if (distanceTo < 0) {
-        if (n_ > 0) {
-            if ((stepsToStop >= -distanceTo) || direction_) n_ = -stepsToStop;
-        } else if (n_ < 0) {
-            if ((stepsToStop < -distanceTo) && !direction_) n_ = -n_;
-        }
-    }
-    if (n_ == 0) {
-        cn_ = c0_;
-        direction_ = distanceTo > 0;
-    } else {
-        cn_ = cn_ - ((2.0f * cn_) / ((4.0f * n_) + 1));
-        if (cn_ < cmin_) cn_ = cmin_;
-    }
-    n_++;
-    interval_ = (uint32_t)cn_;
-    speed_ = 1000000.0f / cn_;
-    if (!direction_) speed_ = -speed_;
-}
-
-void IsrStepper::setMaxSpeed(float speed) {
-    if (speed < 0.0f) speed = -speed;
-    if (maxSpeed_ != speed) {
-        maxSpeed_ = speed;
-        cmin_ = 1000000.0f / speed;
-        if (n_ > 0) {
-            n_ = (long)((speed_ * speed_) / (2.0f * acceleration_));
-            computeNewSpeed();
-        }
-    }
-}
-
-void IsrStepper::setAcceleration(float acceleration) {
-    if (acceleration == 0.0f) return;
-    if (acceleration < 0.0f) acceleration = -acceleration;
-    if (acceleration_ != acceleration) {
-        n_ = n_ * (acceleration_ / acceleration);
-        c0_ = 0.676f * sqrtf(2.0f / acceleration) * 1000000.0f;
-        acceleration_ = acceleration;
-        computeNewSpeed();
-    }
-}
-
-void IsrStepper::stop() {
-    if (speed_ != 0.0f) {
-        const long stepsToStop = (long)((speed_ * speed_) / (2.0f * acceleration_)) + 1;
-        move(speed_ > 0 ? stepsToStop : -stepsToStop);
-    }
+    planner_.stepTaken();
+    countdown_.scheduleNext(planner_.stepIntervalUs());
 }

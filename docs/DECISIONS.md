@@ -16,3 +16,8 @@
 | 2026-10-07 | `analogRead` uses a continuous DMA scan with identical conversion settings | Removes a ~30 us blocking conversion per read; values stay comparable with existing calibrations |
 | 2026-10-07 | Bring-up app stays read-only (no PWM command) | PWM pins drive pumps and fans; PWM is verified in milestone 4 through the application |
 | 2026-10-07 | Watchdog driver provided but not started | Whether a reset mid-run is preferable to a hang is still undecided |
+| 2026-10-07 | Clean-room motion planner (D. Austin's equations) replaces AccelStepper and the AccelStepper-derived StepEngine planner | AccelStepper is GPL-3.0 (or commercial). User chose clean-room. Equivalence proven by host test |
+| 2026-10-07 | TMC2209 driver derived from TMCStepper (MIT) with its notice in `Devices/LICENSE-TMCStepper.txt` | Byte-identical register traffic; permissive licence |
+| 2026-10-07 | TMC `replyDelay` (2 ms) kept | Parity with field firmware until bench-verified; reduce in milestone 8 if useful |
+| 2026-10-07 | Host tests with LLVM-MinGW (clang 22.1.8, winget `MartinStorsjo.LLVM-MinGW.UCRT`) | User approved a host compiler. Plain `LLVM.LLVM` lacks a C++ runtime without Visual Studio |
+| 2026-10-07 | Host tests use `-mno-ms-bitfields` | Matches ARM GCC bitfield layout (confirmed by compiling TMCStepper's structs with arm-none-eabi-g++) |

@@ -3,5 +3,6 @@
 /firmware/*-Release/
 /firmware/.settings/
 /build-logs/
+/build-host/
 *.launch.bak
 __pycache__/

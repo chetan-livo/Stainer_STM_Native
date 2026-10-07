@@ -7,10 +7,12 @@ Native STM32 (HAL/LL/CMSIS) firmware for the Livo Stainer controller boards, rep
 | `firmware/` | STM32CubeIDE project (`.project`, `.cproject`), sources and ST drivers |
 | `firmware/Platform/` | Native platform layer: clocks, startup, linker scripts, GPIO, time base, UART, USB CDC, `Print`/`Stream`, ADC, PWM, I2C, EXTI, step engine, watchdog |
 | `firmware/Boards/` | Per-board configuration (pins, peripherals) |
+| `firmware/Devices/` | External chip drivers (TMC2209) |
 | `firmware/App/` | Application. Milestone 1 holds only the bring-up app |
 | `firmware/Drivers/`, `firmware/Middlewares/` | Unmodified ST code from STM32Cube_FW_F4 V1.28.3 (CMSIS, HAL/LL, USB device library) |
 | `docs/` | Plan, architecture, board matrix, decision log |
 | `tools/` | Project generator and headless build script |
+| `tests/host/` | Host unit and equivalence tests |
 | `validation/` | Bring-up and bench procedures |
 
 ## Build configurations
@@ -43,6 +45,14 @@ powershell -ExecutionPolicy Bypass -File tools/build.ps1 Master-Release   # one
 
 Pin tables are generated too: `python tools/generate_pinmaps.py` (needs the STM32duino 3.0.0 core installed). Build settings are generated: edit `tools/generate_cubeide_project.py`, then run `python tools/generate_cubeide_project.py`. Do not edit `.cproject` by hand in parallel, because the next regeneration overwrites it.
 
+## Host tests
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools/run_host_tests.ps1
+```
+
+This needs LLVM-MinGW (`winget install MartinStorsjo.LLVM-MinGW.UCRT`). The equivalence tests also need the Arduino libraries TMCStepper 0.7.3 and AccelStepper 1.64 in `Documents/Arduino/libraries`. They are references only, never linked into firmware.
+
 ## Status
 
-Milestones 1 (platform skeleton) and 2 (ADC, PWM, I2C, EXTI, step engine, watchdog drivers) build for all 14 configurations with zero warnings. **No board has been flashed yet.** See [docs/PORTING_PLAN.md](docs/PORTING_PLAN.md) for the milestones and [validation/bring-up.md](validation/bring-up.md) for the first hardware check.
+Milestones 1 (platform skeleton), 2 (ADC, PWM, I2C, EXTI, step engine, watchdog) and 3 (`String`, TMC2209 driver, clean-room motion planner) build for all 14 configurations with zero warnings, and all host tests pass. **No board has been flashed yet.** See [docs/PORTING_PLAN.md](docs/PORTING_PLAN.md) for the milestones and [validation/bring-up.md](validation/bring-up.md) for the first hardware check.

@@ -1,5 +1,6 @@
 #include "Print.h"
 #include "Timebase.h"
+#include "WString.h"
 #include <math.h>
 
 size_t Print::write(const uint8_t* buffer, size_t size)
@@ -11,6 +12,8 @@ size_t Print::write(const uint8_t* buffer, size_t size)
     }
     return written;
 }
+
+size_t Print::print(const String& s) { return write((const uint8_t*)s.c_str(), s.length()); }
 
 size_t Print::printUnsigned(unsigned long long n, int base)
 {

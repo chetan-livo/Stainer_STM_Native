@@ -46,7 +46,7 @@ VARIANTS = {
 }
 
 INCLUDES = [
-    '../App', '../Boards', '../Platform/Inc',
+    '../App', '../Boards', '../Devices', '../Platform/Inc',
     '../Drivers/CMSIS/Include',
     '../Drivers/CMSIS/Device/ST/STM32F4xx/Include',
     '../Drivers/STM32F4xx_HAL_Driver/Inc',

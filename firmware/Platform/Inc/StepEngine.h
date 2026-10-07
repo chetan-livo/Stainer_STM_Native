@@ -1,14 +1,16 @@
 #pragma once
 #include "Print.h"
 #include "Pins.h"
+#include "MotionPlanner.h"
 
 // Timer-driven STEP generation for TMC axes.
 //
 // A 50 kHz TIM7 interrupt issues STEP pulses, so step timing no longer depends
-// on how often loop() reaches each motor. The planner is AccelStepper 1.64's
-// trapezoid (same equations, same whole-microsecond intervals). Step times
-// accumulate exactly, so the average rate equals the commanded rate up to one
-// step per tick (50,000 steps/s); individual steps jitter by at most one tick.
+// on how often loop() reaches each motor. Step timing comes from
+// MotionPlanner (clean-room trapezoid; matches AccelStepper 1.64 step for step
+// in tests/host/test_planner.cpp). Step times accumulate exactly, so the
+// average rate equals the commanded rate up to one step per tick (50,000
+// steps/s); individual steps jitter by at most one tick.
 //
 // Freezes that the polled code produced by not servicing a motor are kept:
 //  - holdSteps(): explicit freeze at the bed gates (immediate);
@@ -45,21 +47,21 @@ void reportStats(Print& out); // appended to LOOPSTAT
 
 class IsrStepper {
 public:
-    IsrStepper();
     // Main context. Callers hold StepEngine::Guard around planner calls.
     bool attach(uint8_t stepPin, uint8_t dirPin);
     void setPinsInverted(bool directionInvert, bool stepInvert);
-    void moveTo(long absolute);
-    void move(long relative) { moveTo(current_ + relative); }
-    void setMaxSpeed(float speed);
-    float maxSpeed() const { return maxSpeed_; }
-    void setAcceleration(float acceleration);
-    float acceleration() const { return acceleration_; }
-    void setCurrentPosition(long position);
-    long currentPosition() const { return current_; }
-    long distanceToGo() const { return target_ - current_; }
-    bool isRunning() const { return !(speed_ == 0.0f && target_ == current_); }
-    void stop();
+    void moveTo(long absolute) { planner_.moveTo(absolute); syncCountdown(); }
+    void move(long relative) { planner_.move(relative); syncCountdown(); }
+    void setMaxSpeed(float speed) { planner_.setMaxSpeed(speed); syncCountdown(); }
+    float maxSpeed() const { return planner_.maxSpeed(); }
+    void setAcceleration(float acceleration) { planner_.setAcceleration(acceleration); syncCountdown(); }
+    float acceleration() const { return planner_.acceleration(); }
+    void setCurrentPosition(long position) { planner_.setCurrentPosition(position); countdown_.reset(); }
+    long currentPosition() const { return planner_.currentPosition(); }
+    long distanceToGo() const { return planner_.distanceToGo(); }
+    bool isRunning() const { return planner_.isRunning(); }
+    float speed() const { return planner_.speed(); }
+    void stop() { planner_.stop(); syncCountdown(); }
 
     // Single-word flags; safe without the guard.
     void setActive(bool active) { active_ = active; }
@@ -75,22 +77,16 @@ public:
     void planNextStep();
 
 private:
-    void computeNewSpeed();
+    // Coming to rest restarts the countdown, so the next move steps at once.
+    void syncCountdown() { if (!planner_.stepIntervalUs()) countdown_.reset(); }
 
+    MotionPlanner planner_;
+    StepCountdown countdown_;
     GPIO_TypeDef* stepPort_ = nullptr;
     GPIO_TypeDef* dirPort_ = nullptr;
     uint32_t stepMask_ = 0, dirMask_ = 0;
     uint32_t stepHigh_ = 0, stepLow_ = 0;
     bool dirInverted_ = false, stepInverted_ = false;
-
-    volatile long current_ = 0;
-    long target_ = 0;
-    float speed_ = 0.0f, maxSpeed_ = 0.0f, acceleration_ = 0.0f;
-    long n_ = 0;
-    float c0_ = 0.0f, cn_ = 0.0f, cmin_ = 1.0f;
-    bool direction_ = false; // true = CW (+1), as AccelStepper
-    uint32_t interval_ = 0;  // whole microseconds, 0 = no step pending
-    int32_t remainingUs_ = 0;
 
     volatile bool active_ = false, driverEnabled_ = false, held_ = false, leased_ = false;
     volatile uint32_t leaseTick_ = 0;

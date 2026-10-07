@@ -5,6 +5,8 @@
 
 enum : uint8_t { DEC = 10, HEX = 16, OCT = 8, BIN = 2 };
 
+class String;
+
 // Arduino-compatible text output. Sinks implement write(); everything else
 // formats without printf or heap allocation.
 class Print {
@@ -19,6 +21,7 @@ public:
     size_t write(const char* buffer, size_t size) { return write((const uint8_t*)buffer, size); }
 
     size_t print(const char* s) { return write(s); }
+    size_t print(const String& s);
     size_t print(char c) { return write((uint8_t)c); }
     size_t print(unsigned char n, int base = DEC) { return printUnsigned(n, base); }
     size_t print(int n, int base = DEC) { return printSigned(n, base); }
